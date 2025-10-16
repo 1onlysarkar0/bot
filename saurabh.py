@@ -553,7 +553,7 @@ async def TcPChaT(ip,
 
 
 async def MaiiiinE():
-    Uid, Pw = '4223188434', '3E7FFB26E53336EFD07763252D70E8E400E88E11BA5EEDE80F0CDCE6E28EFD2E'
+    Uid, Pw = '4224944212', 'F1FA2D042F4983CCE6A45899D3EB21A6D145DF9F50D89F4F13455DB60CF15199'
 
     open_id, access_token = await GeNeRaTeAccEss(Uid, Pw)
     if not open_id or not access_token:
