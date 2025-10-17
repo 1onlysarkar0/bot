@@ -27,6 +27,7 @@ spam_chat_id = None
 spam_uid = None
 Spy = False
 Chat_Leave = False
+group_responses_enabled = True  # Secret toggle for group responses
 #------------------------------------------#
 
 Hr = {
@@ -255,8 +256,8 @@ async def SEndPacKeT(OnLinE, ChaT, TypE, PacKeT):
         return 'UnsoPorTed TypE ! >> ErrrroR (:():)'
 
 
-async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
-    global online_writer, spam_room, whisper_writer, spammer_uid, spam_chat_id, spam_uid, XX, uid, Spy, data2, Chat_Leave
+async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=3):
+    global online_writer, spam_room, whisper_writer, spammer_uid, spam_chat_id, spam_uid, XX, uid, Spy, data2, Chat_Leave, group_responses_enabled
     while True:
         try:
             reader, writer = await asyncio.open_connection(ip, int(port))
@@ -270,9 +271,7 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
 
                 if data2.hex().startswith('0500') and len(data2.hex()) > 1000:
                     try:
-                        print(data2.hex()[10:])
                         packet = await DeCode_PackEt(data2.hex()[10:])
-                        print(packet)
                         packet = json.loads(packet)
                         OwNer_UiD, CHaT_CoDe, SQuAD_CoDe = await GeTSQDaTa(
                             packet)
@@ -282,19 +281,20 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
                         await SEndPacKeT(whisper_writer, online_writer, 'ChaT',
                                          JoinCHaT)
 
-                        message = format_welcome_squad(OwNer_UiD, xMsGFixinG)
-                        P = await SEndMsG(0, message, OwNer_UiD, OwNer_UiD,
-                                          key, iv)
-                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT',
-                                         P)
+                        # Send welcome message only if group responses enabled
+                        if group_responses_enabled:
+                            message = format_welcome_squad(OwNer_UiD, xMsGFixinG)
+                            P = await SEndMsG(0, message, OwNer_UiD, OwNer_UiD,
+                                              key, iv)
+                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT',
+                                             P)
+                        print(f" ✓ Squad invite accepted from {OwNer_UiD}")
 
                     except:
                         if data2.hex().startswith('0500') and len(
                                 data2.hex()) > 1000:
                             try:
-                                print(data2.hex()[10:])
                                 packet = await DeCode_PackEt(data2.hex()[10:])
-                                print(packet)
                                 packet = json.loads(packet)
                                 OwNer_UiD, CHaT_CoDe, SQuAD_CoDe = await GeTSQDaTa(
                                     packet)
@@ -304,11 +304,14 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
                                 await SEndPacKeT(whisper_writer, online_writer,
                                                  'ChaT', JoinCHaT)
 
-                                message = format_welcome_squad(OwNer_UiD, xMsGFixinG)
-                                P = await SEndMsG(0, message, OwNer_UiD,
-                                                  OwNer_UiD, key, iv)
-                                await SEndPacKeT(whisper_writer, online_writer,
-                                                 'ChaT', P)
+                                # Send welcome message only if group responses enabled
+                                if group_responses_enabled:
+                                    message = format_welcome_squad(OwNer_UiD, xMsGFixinG)
+                                    P = await SEndMsG(0, message, OwNer_UiD,
+                                                      OwNer_UiD, key, iv)
+                                    await SEndPacKeT(whisper_writer, online_writer,
+                                                     'ChaT', P)
+                                print(f" ✓ Squad invite accepted from {OwNer_UiD}")
                             except:
                                 pass
 
@@ -330,10 +333,9 @@ async def TcPChaT(ip,
                   LoGinDaTaUncRypTinG,
                   ready_event,
                   region,
-                  reconnect_delay=0.5):
-    print(region, 'TCP CHAT')
+                  reconnect_delay=3):
 
-    global spam_room, whisper_writer, spammer_uid, spam_chat_id, spam_uid, online_writer, chat_id, XX, uid, Spy, data2, Chat_Leave
+    global spam_room, whisper_writer, spammer_uid, spam_chat_id, spam_uid, online_writer, chat_id, XX, uid, Spy, data2, Chat_Leave, group_responses_enabled
     while True:
         try:
             reader, writer = await asyncio.open_connection(ip, int(port))
@@ -345,9 +347,9 @@ async def TcPChaT(ip,
             if LoGinDaTaUncRypTinG.Clan_ID:
                 clan_id = LoGinDaTaUncRypTinG.Clan_ID
                 clan_compiled_data = LoGinDaTaUncRypTinG.Clan_Compiled_Data
-                print('\n - TarGeT BoT in CLan ! ')
-                print(f' - Clan Uid > {clan_id}')
-                print(f' - BoT ConnEcTed WiTh CLan ChaT SuccEssFuLy ! ')
+                if not hasattr(TcPChaT, 'clan_connected'):
+                    TcPChaT.clan_connected = True
+                    print(f'\n ✓ Connected to Clan Chat (ID: {clan_id})')
                 pK = await AuthClan(clan_id, clan_compiled_data, key, iv)
                 if whisper_writer:
                     whisper_writer.write(pK)
@@ -357,7 +359,6 @@ async def TcPChaT(ip,
                 if not data: break
 
                 if data.hex().startswith("120000"):
-
                     msg = await DeCode_PackEt(data.hex()[10:])
                     chatdata = json.loads(msg)
                     try:
@@ -370,10 +371,33 @@ async def TcPChaT(ip,
                         response = None
 
                     if response:
+                        # Secret toggle command - only in private chat
+                        if inPuTMsG == '/stop/896422':
+                            try:
+                                dd = chatdata['5']['data']['16']  # Check if private message
+                                group_responses_enabled = not group_responses_enabled
+                                status = "OFF" if not group_responses_enabled else "ON"
+                                print(f' 🔒 Secret: Group responses {status}')
+                            except:
+                                pass  # Not private, ignore
+                        
+                        # Check status command - only in private chat
+                        if inPuTMsG == '/89':
+                            try:
+                                dd = chatdata['5']['data']['16']  # Check if private message
+                                status = "OFF" if not group_responses_enabled else "ON"
+                                color = get_random_color()
+                                status_msg = f"{color}🔍 Status Check\n{color}━━━━━━━━━━━━━━━\n{color}Group Responses: {status}\n{color}━━━━━━━━━━━━━━━"
+                                P = await SEndMsG(response.Data.chat_type, status_msg, uid, chat_id, key, iv)
+                                await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                print(f' → Status check: Group responses {status}')
+                            except:
+                                pass  # Not private, ignore
+                        
                         if inPuTMsG.startswith(("/5")):
                             try:
                                 dd = chatdata['5']['data']['16']
-                                print('msg in private')
+                                print(f' → Command /5 from {uid} (Private)')
                                 message = format_invitation_accepted()
                                 P = await SEndMsG(response.Data.chat_type,
                                                   message, uid, chat_id, key,
@@ -396,29 +420,29 @@ async def TcPChaT(ip,
                                 await SEndPacKeT(whisper_writer, online_writer,
                                                  'OnLine', E)
                             except:
-                                print('msg in squad')
+                                pass
 
                         if inPuTMsG.startswith('/x/'):
                             CodE = inPuTMsG.split('/x/')[1]
                             try:
                                 dd = chatdata['5']['data']['16']
-                                print('msg in private')
+                                print(f' → Joining squad with code: {CodE}')
                                 EM = await GenJoinSquadsPacket(CodE, key, iv)
                                 await SEndPacKeT(whisper_writer, online_writer,
                                                  'OnLine', EM)
 
                             except:
-                                print('msg in squad')
+                                pass
 
                         if inPuTMsG.startswith('/spm/'):
                             try:
                                 dd = chatdata['5']['data']['16']
-                                print('msg in private')
                                 parts = inPuTMsG.split('/')
                                 if len(parts) >= 4:
                                     try:
                                         times = int(parts[2])
                                         target_uid = int(parts[3])
+                                        print(f' → Starting spam: {times} invites to {target_uid}')
                                         ack_msg = format_spam_confirmation(times, target_uid, xMsGFixinG)
                                         P = await SEndMsG(response.Data.chat_type, ack_msg, uid, chat_id, key, iv)
                                         await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
@@ -440,7 +464,7 @@ async def TcPChaT(ip,
                                     except:
                                         pass
                             except:
-                                print('msg in squad')
+                                pass
 
                         if inPuTMsG.startswith('leave'):
                             leave = await ExiT(uid, key, iv)
@@ -525,31 +549,37 @@ async def TcPChaT(ip,
                         if inPuTMsG.strip().startswith('/help'):
                             uid = response.Data.uid
                             chat_id = response.Data.Chat_ID
-                            part1, part2 = format_help()
                             
-                            # Send part 1
-                            P1 = await SEndMsG(response.Data.chat_type, part1,
-                                              uid, chat_id, key, iv)
-                            await SEndPacKeT(whisper_writer, online_writer,
-                                             'ChaT', P1)
-                            
-                            # Wait before sending part 2
-                            await asyncio.sleep(0.5)
-                            
-                            # Send part 2
-                            P2 = await SEndMsG(response.Data.chat_type, part2,
-                                              uid, chat_id, key, iv)
-                            await SEndPacKeT(whisper_writer, online_writer,
-                                             'ChaT', P2)
-                        
+                            # Check if group responses are enabled (0=squad, 1=clan)
+                            if group_responses_enabled or response.Data.chat_type == 2:
+                                part1, part2 = format_help()
+
+                                # Send part 1
+                                P1 = await SEndMsG(response.Data.chat_type, part1,
+                                                  uid, chat_id, key, iv)
+                                await SEndPacKeT(whisper_writer, online_writer,
+                                                 'ChaT', P1)
+
+                                # Wait before sending part 2
+                                await asyncio.sleep(0.5)
+
+                                # Send part 2
+                                P2 = await SEndMsG(response.Data.chat_type, part2,
+                                                  uid, chat_id, key, iv)
+                                await SEndPacKeT(whisper_writer, online_writer,
+                                                 'ChaT', P2)
+
                         if inPuTMsG in ("hi", "hello", "fen", "salam"):
                             uid = response.Data.uid
                             chat_id = response.Data.Chat_ID
-                            message = format_greeting()
-                            P = await SEndMsG(response.Data.chat_type, message,
-                                              uid, chat_id, key, iv)
-                            await SEndPacKeT(whisper_writer, online_writer,
-                                             'ChaT', P)
+                            
+                            # Check if group responses are enabled (0=squad, 1=clan)
+                            if group_responses_enabled or response.Data.chat_type == 2:
+                                message = format_greeting()
+                                P = await SEndMsG(response.Data.chat_type, message,
+                                                  uid, chat_id, key, iv)
+                                await SEndPacKeT(whisper_writer, online_writer,
+                                                 'ChaT', P)
                         response = None
 
             whisper_writer.close()
