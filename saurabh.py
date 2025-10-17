@@ -8,6 +8,10 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 from Pb2 import DEcwHisPErMsG_pb2, MajoRLoGinrEs_pb2, PorTs_pb2, MajoRLoGinrEq_pb2, sQ_pb2, Team_msg_pb2
 from cfonts import render, say
+from message_formatter import (
+    format_greeting, format_help, format_squad_only, format_active_target,
+    format_invitation_accepted, format_spam_confirmation, format_welcome_squad
+)
 
 #EMOTES BY PARAHEX X CODEX
 
@@ -278,7 +282,7 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
                         await SEndPacKeT(whisper_writer, online_writer, 'ChaT',
                                          JoinCHaT)
 
-                        message = f'[B][C]{get_random_color()}\n- Welcome  Bhaiya ji ! '
+                        message = format_welcome_squad(OwNer_UiD, xMsGFixinG)
                         P = await SEndMsG(0, message, OwNer_UiD, OwNer_UiD,
                                           key, iv)
                         await SEndPacKeT(whisper_writer, online_writer, 'ChaT',
@@ -300,7 +304,7 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
                                 await SEndPacKeT(whisper_writer, online_writer,
                                                  'ChaT', JoinCHaT)
 
-                                message = f"[B][C]{get_random_color()}\n- Wecome Bhaiya ji ! \n\n{get_random_color()}- Commands : @a {xMsGFixinG('player_uid')} {xMsGFixinG('909000001')}\n\n[00FF00]Dev : @{xMsGFixinG('1onlysarkar')}"
+                                message = format_welcome_squad(OwNer_UiD, xMsGFixinG)
                                 P = await SEndMsG(0, message, OwNer_UiD,
                                                   OwNer_UiD, key, iv)
                                 await SEndPacKeT(whisper_writer, online_writer,
@@ -370,7 +374,7 @@ async def TcPChaT(ip,
                             try:
                                 dd = chatdata['5']['data']['16']
                                 print('msg in private')
-                                message = f"[B][C]{get_random_color()}\n\nAccepT My Invitation FasT\n\n"
+                                message = format_invitation_accepted()
                                 P = await SEndMsG(response.Data.chat_type,
                                                   message, uid, chat_id, key,
                                                   iv)
@@ -415,7 +419,7 @@ async def TcPChaT(ip,
                                     try:
                                         times = int(parts[2])
                                         target_uid = int(parts[3])
-                                        ack_msg = f"[B][C]{get_random_color()}\n done {times} {xMsGFixinG(target_uid)} aisa"
+                                        ack_msg = format_spam_confirmation(times, target_uid, xMsGFixinG)
                                         P = await SEndMsG(response.Data.chat_type, ack_msg, uid, chat_id, key, iv)
                                         await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
                                         PAc = await OpEnSq(key, iv, region)
@@ -449,93 +453,99 @@ async def TcPChaT(ip,
                                              'OnLine', EM)
 
                         if inPuTMsG.strip().startswith('@a'):
+                            parts = inPuTMsG.strip().split()
+                            print(response.Data.chat_type, uid, chat_id)
+                            message = format_active_target(uid, xMsGFixinG)
+
+                            P = await SEndMsG(response.Data.chat_type,
+                                              message, uid, chat_id, key,
+                                              iv)
+
+                            uid2 = uid3 = uid4 = uid5 = None
+                            s = False
 
                             try:
-                                dd = chatdata['5']['data']['16']
-                                print('msg in private')
-                                message = f"[B][C]{get_random_color()}\n\nCommand Available OnLy In SQuaD ! \n\n"
-                                P = await SEndMsG(response.Data.chat_type,
-                                                  message, uid, chat_id, key,
-                                                  iv)
-                                await SEndPacKeT(whisper_writer, online_writer,
-                                                 'ChaT', P)
+                                uid = int(parts[1])
+                                uid2 = int(parts[2])
+                                uid3 = int(parts[3])
+                                uid4 = int(parts[4])
+                                uid5 = int(parts[5])
+                                idT = int(parts[5])
 
-                            except:
-                                print('msg in squad')
+                            except ValueError as ve:
+                                print("ValueError:", ve)
+                                s = True
 
-                                parts = inPuTMsG.strip().split()
-                                print(response.Data.chat_type, uid, chat_id)
-                                message = f'[B][C]{get_random_color()}\nACITVE TarGeT -> {xMsGFixinG(uid)}\n'
+                            except Exception:
+                                idT = len(parts) - 1
+                                idT = int(parts[idT])
+                                print(idT)
+                                print(uid)
 
-                                P = await SEndMsG(response.Data.chat_type,
-                                                  message, uid, chat_id, key,
-                                                  iv)
-
-                                uid2 = uid3 = uid4 = uid5 = None
-                                s = False
-
+                            if not s:
                                 try:
-                                    uid = int(parts[1])
-                                    uid2 = int(parts[2])
-                                    uid3 = int(parts[3])
-                                    uid4 = int(parts[4])
-                                    uid5 = int(parts[5])
-                                    idT = int(parts[5])
+                                    await SEndPacKeT(
+                                        whisper_writer, online_writer,
+                                        'ChaT', P)
 
-                                except ValueError as ve:
-                                    print("ValueError:", ve)
-                                    s = True
+                                    H = await Emote_k(
+                                        uid, idT, key, iv, region)
+                                    await SEndPacKeT(
+                                        whisper_writer, online_writer,
+                                        'OnLine', H)
 
-                                except Exception:
-                                    idT = len(parts) - 1
-                                    idT = int(parts[idT])
-                                    print(idT)
-                                    print(uid)
-
-                                if not s:
-                                    try:
+                                    if uid2:
+                                        H = await Emote_k(
+                                            uid2, idT, key, iv, region)
                                         await SEndPacKeT(
                                             whisper_writer, online_writer,
-                                            'ChaT', P)
-
+                                            'OnLine', H)
+                                    if uid3:
                                         H = await Emote_k(
-                                            uid, idT, key, iv, region)
+                                            uid3, idT, key, iv, region)
+                                        await SEndPacKeT(
+                                            whisper_writer, online_writer,
+                                            'OnLine', H)
+                                    if uid4:
+                                        H = await Emote_k(
+                                            uid4, idT, key, iv, region)
+                                        await SEndPacKeT(
+                                            whisper_writer, online_writer,
+                                            'OnLine', H)
+                                    if uid5:
+                                        H = await Emote_k(
+                                            uid5, idT, key, iv, region)
                                         await SEndPacKeT(
                                             whisper_writer, online_writer,
                                             'OnLine', H)
 
-                                        if uid2:
-                                            H = await Emote_k(
-                                                uid2, idT, key, iv, region)
-                                            await SEndPacKeT(
-                                                whisper_writer, online_writer,
-                                                'OnLine', H)
-                                        if uid3:
-                                            H = await Emote_k(
-                                                uid3, idT, key, iv, region)
-                                            await SEndPacKeT(
-                                                whisper_writer, online_writer,
-                                                'OnLine', H)
-                                        if uid4:
-                                            H = await Emote_k(
-                                                uid4, idT, key, iv, region)
-                                            await SEndPacKeT(
-                                                whisper_writer, online_writer,
-                                                'OnLine', H)
-                                        if uid5:
-                                            H = await Emote_k(
-                                                uid5, idT, key, iv, region)
-                                            await SEndPacKeT(
-                                                whisper_writer, online_writer,
-                                                'OnLine', H)
+                                except Exception as e:
+                                    pass
 
-                                    except Exception as e:
-                                        pass
-
+                        if inPuTMsG.strip().startswith('/help'):
+                            uid = response.Data.uid
+                            chat_id = response.Data.Chat_ID
+                            part1, part2 = format_help()
+                            
+                            # Send part 1
+                            P1 = await SEndMsG(response.Data.chat_type, part1,
+                                              uid, chat_id, key, iv)
+                            await SEndPacKeT(whisper_writer, online_writer,
+                                             'ChaT', P1)
+                            
+                            # Wait before sending part 2
+                            await asyncio.sleep(0.5)
+                            
+                            # Send part 2
+                            P2 = await SEndMsG(response.Data.chat_type, part2,
+                                              uid, chat_id, key, iv)
+                            await SEndPacKeT(whisper_writer, online_writer,
+                                             'ChaT', P2)
+                        
                         if inPuTMsG in ("hi", "hello", "fen", "salam"):
                             uid = response.Data.uid
                             chat_id = response.Data.Chat_ID
-                            message = 'Hello, Follow\nInstagram : @1onlysarkar'
+                            message = format_greeting()
                             P = await SEndMsG(response.Data.chat_type, message,
                                               uid, chat_id, key, iv)
                             await SEndPacKeT(whisper_writer, online_writer,
