@@ -55,3 +55,13 @@ def get_emote(name: str) -> Optional[str]:
 def get_all_emotes() -> Dict[str, str]:
     config = load_config()
     return config.get("emotes", {})
+
+def remove_emote(name: str) -> bool:
+    config = load_config()
+    if "emotes" not in config:
+        return False
+    if name in config["emotes"]:
+        del config["emotes"][name]
+        save_config(config)
+        return True
+    return False
