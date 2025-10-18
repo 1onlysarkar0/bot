@@ -8,3 +8,15 @@ PyJWT
 pytz
 urllib3
 cfonts
+aiohttp
+cfonts
+crypto
+protobuf
+protobuf_decoder
+psutil
+pycryptodome
+PyJWT
+python-cfonts
+pytz
+requests
+urllib3
