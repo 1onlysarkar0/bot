@@ -582,6 +582,96 @@ async def TcPChaT(ip,
                                 await SEndPacKeT(whisper_writer, online_writer,
                                                  'ChaT', P)
                         
+                        if inPuTMsG.startswith('/emt'):
+                            try:
+                                dd = chatdata['5']['data']['16']
+                                all_emotes = config_manager.get_all_emotes()
+                                
+                                if not all_emotes:
+                                    message = "No emotes available"
+                                    P = await SEndMsG(response.Data.chat_type, message,
+                                                      response.Data.uid, response.Data.Chat_ID, key, iv)
+                                    await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                else:
+                                    emote_names = list(all_emotes.keys())
+                                    chunk_size = 10
+                                    
+                                    # Send emotes in chunks of 10
+                                    for i in range(0, len(emote_names), chunk_size):
+                                        chunk = emote_names[i:i + chunk_size]
+                                        message = ' '.join([f'/{name}' for name in chunk])
+                                        P = await SEndMsG(response.Data.chat_type, message,
+                                                          response.Data.uid, response.Data.Chat_ID, key, iv)
+                                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                        await asyncio.sleep(0.3)  # Small delay between chunks
+                                    
+                                    print(f' → Sent {len(emote_names)} emotes in {(len(emote_names) + chunk_size - 1) // chunk_size} parts')
+                            except:
+                                pass
+                        
+                        if inPuTMsG.startswith('/all/'):
+                            try:
+                                dd = chatdata['5']['data']['16']
+                                parts = inPuTMsG.split('/')
+                                if len(parts) >= 3:
+                                    try:
+                                        seconds = float(parts[2])
+                                        saved_owner_uids = config_manager.get_owner_uids()
+                                        all_emotes = config_manager.get_all_emotes()
+                                        
+                                        if not saved_owner_uids:
+                                            color = get_random_color()
+                                            message = f"[B][C]{color}UID Not Found\n{color}--------------------\n{color} \n{color}No UID found\n{color}Please set using\n{color}/uid/{{uid}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, message,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                        elif not all_emotes:
+                                            color = get_random_color()
+                                            message = f"[B][C]{color}No Emotes\n{color}--------------------\n{color} \n{color}No emotes available\n{color}Please add emotes first\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, message,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                        else:
+                                            color = get_random_color()
+                                            start_msg = f"[B][C]{color}Starting All Emotes\n{color}--------------------\n{color} \n{color}Executing {len(all_emotes)} emotes\n{color}Interval: {seconds}s\n{color}UIDs: {len(saved_owner_uids)}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, start_msg,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                            
+                                            # Execute all emotes sequentially
+                                            for emote_name, emote_code in all_emotes.items():
+                                                # Send emotes to all UIDs simultaneously
+                                                tasks = []
+                                                for saved_uid in saved_owner_uids:
+                                                    H = await Emote_k(int(saved_uid), int(emote_code), key, iv, region)
+                                                    tasks.append(SEndPacKeT(whisper_writer, online_writer, 'OnLine', H))
+                                                await asyncio.gather(*tasks)
+                                                
+                                                # Send response with emote name and code
+                                                color = get_random_color()
+                                                response_msg = f"[B][C]{color}Emote Executed\n{color}--------------------\n{color} \n{color}Name: /{emote_name}\n{color}Code: {emote_code}\n{color} \n{color}--------------------"
+                                                P = await SEndMsG(response.Data.chat_type, response_msg,
+                                                                  response.Data.uid, response.Data.Chat_ID, key, iv)
+                                                await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                                
+                                                print(f' → Executed /{emote_name} (code: {emote_code}) to {len(saved_owner_uids)} UIDs')
+                                                await asyncio.sleep(seconds)
+                                            
+                                            color = get_random_color()
+                                            end_msg = f"[B][C]{color}All Emotes Completed\n{color}--------------------\n{color} \n{color}Total: {len(all_emotes)} emotes\n{color}Executed successfully\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, end_msg,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                    except ValueError:
+                                        color = get_random_color()
+                                        message = f"[B][C]{color}Invalid Format\n{color}--------------------\n{color} \n{color}Please use:\n{color}/all/{{seconds}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                        P = await SEndMsG(response.Data.chat_type, message,
+                                                          response.Data.uid, response.Data.Chat_ID, key, iv)
+                                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                            except Exception as e:
+                                print(f' → Error in /all command: {e}')
+                                pass
+                        
                         if inPuTMsG.startswith('/uid/'):
                             try:
                                 dd = chatdata['5']['data']['16']
@@ -618,41 +708,113 @@ async def TcPChaT(ip,
                             except:
                                 pass
                         
-                        if inPuTMsG.startswith('/') and not inPuTMsG.startswith('/uid/') and not inPuTMsG.startswith('/e/') and not inPuTMsG.startswith('/help') and not inPuTMsG.startswith('/5') and not inPuTMsG.startswith('/x/') and not inPuTMsG.startswith('/spm/') and not inPuTMsG.startswith('/s') and not inPuTMsG.startswith('/stop/') and not inPuTMsG.startswith('/89'):
+                        if inPuTMsG.startswith('/') and not inPuTMsG.startswith('/uid/') and not inPuTMsG.startswith('/e/') and not inPuTMsG.startswith('/help') and not inPuTMsG.startswith('/5') and not inPuTMsG.startswith('/x/') and not inPuTMsG.startswith('/spm/') and not inPuTMsG.startswith('/s') and not inPuTMsG.startswith('/stop/') and not inPuTMsG.startswith('/89') and not inPuTMsG.startswith('/emt') and not inPuTMsG.startswith('/all/'):
                             try:
                                 dd = chatdata['5']['data']['16']
-                                command_name = inPuTMsG[1:].strip()
-                                saved_owner_uids = config_manager.get_owner_uids()
-                                saved_emote = config_manager.get_emote(command_name)
                                 
-                                if not saved_owner_uids:
-                                    color = get_random_color()
-                                    message = f"[B][C]{color}UID Not Found\n{color}--------------------\n{color} \n{color}No UID found\n{color}Please set using\n{color}/uid/{{uid}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
-                                    P = await SEndMsG(response.Data.chat_type, message,
-                                                      response.Data.uid, response.Data.Chat_ID, key, iv)
-                                    await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
-                                elif not saved_emote:
-                                    color = get_random_color()
-                                    message = f"[B][C]{color}Command Not Found\n{color}--------------------\n{color} \n{color}Command not found\n{color}Please create it using\n{color}/e/{{name}}/{{emote}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
-                                    P = await SEndMsG(response.Data.chat_type, message,
-                                                      response.Data.uid, response.Data.Chat_ID, key, iv)
-                                    await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                # Check if it's a custom sequence command (contains dots)
+                                if '.' in inPuTMsG:
+                                    saved_owner_uids = config_manager.get_owner_uids()
+                                    all_emotes = config_manager.get_all_emotes()
+                                    
+                                    if not saved_owner_uids:
+                                        color = get_random_color()
+                                        message = f"[B][C]{color}UID Not Found\n{color}--------------------\n{color} \n{color}No UID found\n{color}Please set using\n{color}/uid/{{uid}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                        P = await SEndMsG(response.Data.chat_type, message,
+                                                          response.Data.uid, response.Data.Chat_ID, key, iv)
+                                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                    else:
+                                        # Parse the sequence: /{name}.{second}/{name}.{second}/...
+                                        sequence_parts = inPuTMsG[1:].split('/')
+                                        emote_sequence = []
+                                        
+                                        for part in sequence_parts:
+                                            if '.' in part:
+                                                try:
+                                                    emote_name, timing = part.split('.', 1)
+                                                    emote_name = emote_name.strip()
+                                                    timing = float(timing.strip())
+                                                    
+                                                    if emote_name in all_emotes:
+                                                        emote_sequence.append({
+                                                            'name': emote_name,
+                                                            'code': all_emotes[emote_name],
+                                                            'timing': timing
+                                                        })
+                                                except:
+                                                    continue
+                                        
+                                        if not emote_sequence:
+                                            color = get_random_color()
+                                            message = f"[B][C]{color}Invalid Sequence\n{color}--------------------\n{color} \n{color}No valid emotes found\n{color}Format:\n{color}/{{name}}.{{sec}}/{{name}}.{{sec}}/\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, message,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                        else:
+                                            color = get_random_color()
+                                            start_msg = f"[B][C]{color}Starting Sequence\n{color}--------------------\n{color} \n{color}Executing {len(emote_sequence)} emotes\n{color}UIDs: {len(saved_owner_uids)}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, start_msg,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                            
+                                            # Execute emote sequence
+                                            for emote_data in emote_sequence:
+                                                # Send emotes to all UIDs simultaneously
+                                                tasks = []
+                                                for saved_uid in saved_owner_uids:
+                                                    H = await Emote_k(int(saved_uid), int(emote_data['code']), key, iv, region)
+                                                    tasks.append(SEndPacKeT(whisper_writer, online_writer, 'OnLine', H))
+                                                await asyncio.gather(*tasks)
+                                                
+                                                # Send response with emote name and code
+                                                color = get_random_color()
+                                                response_msg = f"[B][C]{color}Emote Executed\n{color}--------------------\n{color} \n{color}Name: /{emote_data['name']}\n{color}Code: {emote_data['code']}\n{color}Duration: {emote_data['timing']}s\n{color} \n{color}--------------------"
+                                                P = await SEndMsG(response.Data.chat_type, response_msg,
+                                                                  response.Data.uid, response.Data.Chat_ID, key, iv)
+                                                await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                                
+                                                print(f' → Executed /{emote_data["name"]} (code: {emote_data["code"]}) for {emote_data["timing"]}s to {len(saved_owner_uids)} UIDs')
+                                                await asyncio.sleep(emote_data['timing'])
+                                            
+                                            color = get_random_color()
+                                            end_msg = f"[B][C]{color}Sequence Completed\n{color}--------------------\n{color} \n{color}Total: {len(emote_sequence)} emotes\n{color}Executed successfully\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                            P = await SEndMsG(response.Data.chat_type, end_msg,
+                                                              response.Data.uid, response.Data.Chat_ID, key, iv)
+                                            await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
                                 else:
-                                    color = get_random_color()
-                                    message = f"[B][C]{color}Sent Successfully\n{color}--------------------\n{color} \n{color}Sent successfully\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
-                                    P = await SEndMsG(response.Data.chat_type, message,
-                                                      response.Data.uid, response.Data.Chat_ID, key, iv)
-                                    await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                    # Single emote command
+                                    command_name = inPuTMsG[1:].strip()
+                                    saved_owner_uids = config_manager.get_owner_uids()
+                                    saved_emote = config_manager.get_emote(command_name)
                                     
-                                    # Send emotes to all UIDs simultaneously
-                                    tasks = []
-                                    for saved_uid in saved_owner_uids:
-                                        H = await Emote_k(int(saved_uid), int(saved_emote), key, iv, region)
-                                        tasks.append(SEndPacKeT(whisper_writer, online_writer, 'OnLine', H))
-                                    
-                                    # Execute all sends concurrently
-                                    await asyncio.gather(*tasks)
-                                    print(f' → Executed /{command_name} -> sent emote {saved_emote} to {len(saved_owner_uids)} UIDs simultaneously')
+                                    if not saved_owner_uids:
+                                        color = get_random_color()
+                                        message = f"[B][C]{color}UID Not Found\n{color}--------------------\n{color} \n{color}No UID found\n{color}Please set using\n{color}/uid/{{uid}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                        P = await SEndMsG(response.Data.chat_type, message,
+                                                          response.Data.uid, response.Data.Chat_ID, key, iv)
+                                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                    elif not saved_emote:
+                                        color = get_random_color()
+                                        message = f"[B][C]{color}Command Not Found\n{color}--------------------\n{color} \n{color}Command not found\n{color}Please create it using\n{color}/e/{{name}}/{{emote}}\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                        P = await SEndMsG(response.Data.chat_type, message,
+                                                          response.Data.uid, response.Data.Chat_ID, key, iv)
+                                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                    else:
+                                        color = get_random_color()
+                                        message = f"[B][C]{color}Sent Successfully\n{color}--------------------\n{color} \n{color}Sent successfully\n{color} \n{color}--------------------\n{color} \n{color}Follow on Instagram\n{color}@1onlysarkar"
+                                        P = await SEndMsG(response.Data.chat_type, message,
+                                                          response.Data.uid, response.Data.Chat_ID, key, iv)
+                                        await SEndPacKeT(whisper_writer, online_writer, 'ChaT', P)
+                                        
+                                        # Send emotes to all UIDs simultaneously
+                                        tasks = []
+                                        for saved_uid in saved_owner_uids:
+                                            H = await Emote_k(int(saved_uid), int(saved_emote), key, iv, region)
+                                            tasks.append(SEndPacKeT(whisper_writer, online_writer, 'OnLine', H))
+                                        
+                                        # Execute all sends concurrently
+                                        await asyncio.gather(*tasks)
+                                        print(f' → Executed /{command_name} -> sent emote {saved_emote} to {len(saved_owner_uids)} UIDs simultaneously')
                             except Exception as e:
                                 print(f' → Error executing custom command: {e}')
                                 pass
