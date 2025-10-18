@@ -339,7 +339,46 @@ if inPuTMsG == '/stop/896422':
 
 ---
 
-### 13. **List All Emotes** (Private Only)
+### 13. **Remove Emote Command** (Private Only)
+**Command:** `/rmv/{name}`
+
+**Example:** `/rmv/ak`
+
+**Response (Success):**
+```
+[B][C][Random Color]Emote Removed
+[Random Color]--------------------
+[Random Color] 
+[Random Color]Command /ak
+[Random Color]removed successfully
+[Random Color] 
+[Random Color]--------------------
+[Random Color] 
+[Random Color]Follow on Instagram
+[Random Color]@1onlysarkar
+```
+
+**Response (Not Found):**
+```
+[B][C][Random Color]Emote Not Found
+[Random Color]--------------------
+[Random Color] 
+[Random Color]Command /ak
+[Random Color]does not exist
+[Random Color] 
+[Random Color]--------------------
+[Random Color] 
+[Random Color]Follow on Instagram
+[Random Color]@1onlysarkar
+```
+
+**Working:**
+- Removes emote command from `config.json`
+- Returns success/failure status
+
+---
+
+### 14. **List All Emotes** (Private Only)
 **Command:** `/emt`
 
 **Purpose:** Show all saved emote commands
@@ -359,7 +398,7 @@ if inPuTMsG == '/stop/896422':
 
 ---
 
-### 14. **Execute All Emotes** (Private Only)
+### 15. **Execute All Emotes** (Private Only)
 **Command:** `/all/{seconds}`
 
 **Example:** `/all/2`
@@ -417,7 +456,7 @@ if inPuTMsG == '/stop/896422':
 
 ---
 
-### 15. **Execute Custom Emote** (Private Only)
+### 16. **Execute Custom Emote** (Private Only)
 **Command:** `/{name}`
 
 **Example:** `/ak`
@@ -472,7 +511,7 @@ if inPuTMsG == '/stop/896422':
 
 ---
 
-### 16. **Emote Sequence** (Private Only)
+### 17. **Emote Sequence** (Private Only)
 **Command:** `/{name}.{seconds}/{name}.{seconds}/{name}.{seconds}/...`
 
 **Example:** `/ak.2/m10.3/thompson.1.5/`
@@ -547,6 +586,7 @@ if inPuTMsG == '/stop/896422':
 Custom emote commands (`/{name}`) do NOT trigger when command starts with:
 - `/uid/`
 - `/e/`
+- `/rmv/`
 - `/help`
 - `/5`
 - `/x/`
@@ -665,6 +705,7 @@ Function: `xMsGFixinG(uid)`
 - `add_emote(name, code)` - Save emote
 - `get_emote(name)` - Get single emote
 - `get_all_emotes()` - Get all emotes dict
+- `remove_emote(name)` - Remove emote (returns True/False)
 
 ---
 
@@ -800,8 +841,9 @@ emotes = {
 - **v5.0** - Added `/all/{seconds}` command (execute all emotes)
 - **v6.0** - Added sequence command `/{name}.{sec}/...`
 - **v7.0** - Optimized UID execution (simultaneous via asyncio.gather)
+- **v7.1** - Added `/rmv/{name}` command to remove emote commands
 
 ---
 
 **Last Updated:** 2025-01-18
-**Documentation Version:** 7.0
+**Documentation Version:** 7.1
